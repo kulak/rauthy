@@ -1,3 +1,11 @@
+FROM --platform=$TARGETPLATFORM debian:12-slim AS deps
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libssl3 && \
+    rm -rf /var/lib/apt/lists/*
+
 FROM --platform=$TARGETPLATFORM gcr.io/distroless/cc-debian12:nonroot
 
 # docker buildx args automatically available
@@ -22,6 +30,9 @@ LABEL org.opencontainers.image.title="Rauthy"
 LABEL org.opencontainers.image.url="https://github.com/sebadob/rauthy"
 LABEL org.opencontainers.image.vendor="Sebastian Dobe"
 LABEL org.opencontainers.image.version="$VERSION"
+
+COPY --from=deps /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=deps /usr/lib/ /usr/lib/
 
 USER $TARGET_USER
 
